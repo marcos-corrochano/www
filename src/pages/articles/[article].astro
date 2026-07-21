@@ -1,0 +1,30 @@
+---
+import Article from '@layouts/Article.astro'
+import type { GetStaticPaths } from 'astro'
+import type { CollectionEntry } from 'astro:content'
+import { getCollection, render } from 'astro:content'
+
+export const getStaticPaths = (async () => {
+	const notes = await getCollection('articles', ({ data }) => {
+		return import.meta.env.PROD ? data.draft !== true : true
+	})
+
+	return notes.map((article) => {
+		return {
+			params: { article: article.id },
+			props: { article }
+		}
+	})
+}) satisfies GetStaticPaths
+
+interface Props {
+	article: CollectionEntry<'articles'>
+}
+
+const { article } = Astro.props
+const { Content } = await render(article)
+---
+
+<Article {article}>
+	<Content />
+</Article>
